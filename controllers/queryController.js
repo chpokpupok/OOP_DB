@@ -12,7 +12,7 @@ const get_faculty = async (req, res) => {
   }
 };
 
-const getCooperatorById = async (req, res) => {
+const get_faculty_by_id = async (req, res) => {
   try {
     const id = req.params.id;
     const client = await pool.connect();
@@ -40,7 +40,7 @@ const add_faculty = async (req, res) => {
   }
 };
 
-const updateCooperator = async (req, res) => {
+const update_faculty = async (req, res) => {
   try {
     const id = req.params.id;
     const { name, dean, phone_number } = req.body;
@@ -57,7 +57,7 @@ const updateCooperator = async (req, res) => {
   }
 };
 
-const removeCooperator = async (req, res) => {
+const delete_faculty = async (req, res) => {
   try {
     const id = req.params.id;
     const client = await pool.connect();
@@ -75,8 +75,8 @@ const removeCooperator = async (req, res) => {
 
 module.exports = {
   get_faculty,
-  getCooperatorById,
+  get_faculty_by_id,
   add_faculty,
-  updateCooperator,
-  removeCooperator
+  update_faculty,
+  delete_faculty
 };

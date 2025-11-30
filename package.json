@@ -1,10 +1,11 @@
 {
   "name": "oop_db",
   "version": "1.0.0",
-  "description": "",
+  "description": "��#\u0000 \u0000O\u0000O\u0000P\u0000_\u0000D\u0000B\u0000\r\u0000 \u0000",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

@@ -16,10 +16,16 @@ const update_faculty =
 const delete_faculty =
   "DELETE FROM faculty WHERE faculty_id = $1 RETURNING *";
 
+//ПРОЦЕДУРЫ САФИРА
+const register_supervisor = "call register_supervisor($1, $2, $3, $4, $5, $6, $7, $8)"; 
+
+
 module.exports = {
   get_faculty,
   get_faculty_by_id,
   add_faculty,
   update_faculty,
   delete_faculty,
+
+  register_supervisor,
 };

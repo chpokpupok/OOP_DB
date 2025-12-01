@@ -8,13 +8,6 @@ const get_faculty_by_id = "SELECT * FROM faculty WHERE faculty_id = $1";
 const add_faculty =
   "INSERT INTO faculty (name, dean, phone_number) VALUES ($1, $2, $3) RETURNING *";
 
-// UPDATE
-const update_faculty =
-  "UPDATE faculty SET name = $1, dean = $2, phone_number = $3 WHERE faculty_id = $4 RETURNING *";
-
-// DELETE
-const delete_faculty =
-  "DELETE FROM faculty WHERE faculty_id = $1 RETURNING *";
 
 //ПРОЦЕДУРЫ САФИРА
 const register_supervisor = "call register_supervisor($1, $2, $3, $4, $5, $6, $7, $8)"; 
@@ -29,23 +22,37 @@ const delete_group = "call delete_group($1)";
 const insert_department = "call insert_department($1, $2, $3, $4)";
 
 //ПРОЦЕДУРЫ КАМИЛЬ
-const updateCourseworkTeacher = "CALL update_coursework_teacher($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
-const addCourseworkPlan = "CALL add_coursework_plan($1, $2, $3, $4, $5)";
-const removeCourseworkPlan = "CALL remove_coursework_plan($1)";
-const addSupervisorDepartment = "CALL add_supervisor_department($1, $2)";
-const removeSupervisorDepartment = "CALL remove_supervisor_department($1)";
+const update_coursework_teacher = "CALL update_coursework_teacher($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
+const add_coursework_plan = "CALL add_coursework_plan($1, $2, $3, $4, $5)";
+const remove_coursework_plan = "CALL remove_coursework_plan($1)";
+const add_supervisor_department = "CALL add_supervisor_department($1, $2)";
+const remove_supervisor_department = "CALL remove_supervisor_department($1)";
 
 //ПОЛЬЗОВАТЕЛЬСКИЕ ФУНКЦИИ КАМИЛЬ
-const getCourseworksForTeacher = "SELECT * FROM get_courseworks_for_teacher($1)";
-const generateStudentCredentials = "SELECT * FROM generate_student_credentials()";
-const createCourseworkReport = "SELECT * FROM create_coursework_report()";
+const get_courseworks_for_teacher = "SELECT * FROM get_courseworks_for_teacher($1)";
+const generate_student_credentials = "SELECT * FROM generate_student_credentials()";
+const create_coursework_report = "SELECT * FROM create_coursework_report()";
 
 //ОБЫЧНЫЕ ЗАПРОСЫ ДЛЯ ТАБЛИЦЫ COURSEWORK КАМИЛЬ
-const getCourseworks = "SELECT * FROM coursework";
-const getCourseworkById = "SELECT * FROM coursework WHERE coursework_id = $1";
-const addCoursework = "INSERT INTO coursework (student_id, supervisor_id, discipline_id, topic) VALUES ($1, $2, $3, $4)";
-const updateCoursework = "UPDATE coursework SET topic = $1 WHERE coursework_id = $2";
-const removeCoursework = "DELETE FROM coursework WHERE coursework_id = $1";
+const get_courseworks = "SELECT * FROM coursework";
+const get_coursework_by_id = "SELECT * FROM coursework WHERE coursework_id = $1";
+const add_coursework = "INSERT INTO coursework (student_id, supervisor_id, discipline_id, topic) VALUES ($1, $2, $3, $4)";
+const update_coursework = "UPDATE coursework SET topic = $1 WHERE coursework_id = $2";
+const remove_coursework = "DELETE FROM coursework WHERE coursework_id = $1";
+
+//артем процедуры
+
+const delete_department = 'CALL delete_department($1)';
+const update_department = 'CALL update_department($1, $2, $3, $4, $5)';
+const insert_faculty = 'CALL insert_faculty($1, $2, $3)';
+const delete_faculty = 'CALL delete_faculty($1)';
+const update_faculty = 'CALL update_faculty($1, $2, $3, $4)';
+const add_students_to_group = 'CALL add_students_to_group($1, $2::TEXT[])';
+const update_student = 'CALL update_student($1, $2, $3, $4)';
+const insert_coursework = 'CALL insert_coursework($1, $2, $3, $4)';
+const delete_coursework = 'CALL delete_coursework($1)';
+const update_coursework_student = 'CALL update_coursework_student($1, $2, $3)';
+
 
 
 module.exports = {
@@ -70,7 +77,7 @@ module.exports = {
   //камиль
   update_coursework_teacher,
   add_coursework_plan,
-  remove_poursework_plan,
+  remove_coursework_plan,
   add_supervisor_department,
   remove_supervisor_department,
 
@@ -79,8 +86,19 @@ module.exports = {
   create_coursework_report,
 
   get_courseworks,
-  get_coursework_byId,
+  get_coursework_by_id,
   add_coursework,
   update_coursework,
-  remove_coursework
+  remove_coursework,
+
+  //артем
+
+  delete_department,
+  update_department,
+  insert_faculty,
+  add_students_to_group,
+  update_student,
+  insert_coursework,
+  delete_coursework,
+  update_coursework_student
 };

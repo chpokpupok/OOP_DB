@@ -262,6 +262,107 @@ const remove_supervisor_department = (req, res) => {
     );
 };
 
+//артем
+
+const delete_department = async (req, res) => {
+  const { name } = req.body;
+  try {
+    await pool.query(queries.delete_department, [name]);
+    res.status(200).json({ success: true, message: 'Department deleted' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const update_department = async (req, res) => {
+  const { old_name, new_name, faculty, head, phone } = req.body;
+  try {
+    await pool.query(queries.update_department, [old_name, new_name, faculty, head, phone]);
+    res.status(200).json({ success: true, message: 'Department updated' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const insert_faculty = async (req, res) => {
+  const { name, dean, phone } = req.body;
+  try {
+    await pool.query(queries.insert_faculty, [name, dean, phone]);
+    res.status(201).json({ success: true, message: 'Faculty inserted' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const delete_faculty = async (req, res) => {
+  const { name } = req.body;
+  try {
+    await pool.query(queries.delete_faculty, [name]);
+    res.status(200).json({ success: true, message: 'Faculty deleted' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const update_faculty = async (req, res) => {
+  const { old_name, new_name, dean, phone } = req.body;
+  try {
+    await pool.query(queries.update_faculty, [old_name, new_name, dean, phone]);
+    res.status(200).json({ success: true, message: 'Faculty updated' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const add_students_to_group = async (req, res) => {
+  const { group_name, students_list } = req.body;
+  try {
+    await pool.query(queries.add_students_to_group, [group_name, students_list]);
+    res.status(201).json({ success: true, message: 'Students added to group' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const update_student = async (req, res) => {
+  const { student_login, phone, email, leader } = req.body;
+  try {
+    await pool.query(queries.update_student, [student_login, phone, email, leader]);
+    res.status(200).json({ success: true, message: 'Student updated' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const insert_course_work = async (req, res) => {
+  const { student_login, supervisor_login, discipline_name, topic } = req.body;
+  try {
+    await pool.query(queries.insert_coursework, [student_login, supervisor_login, discipline_name, topic]);
+    res.status(201).json({ success: true, message: 'Coursework created' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const delete_course_work = async (req, res) => {
+  const { coursework_id } = req.body;
+  try {
+    await pool.query(queries.delete_coursework, [coursework_id]);
+    res.status(200).json({ success: true, message: 'Coursework deleted' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const update_course_work_student = async (req, res) => {
+  const { coursework_id, topic, work_link } = req.body;
+  try {
+    await pool.query(queries.update_coursework_student, [coursework_id, topic, work_link]);
+    res.status(200).json({ success: true, message: 'Coursework updated by student' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 module.exports = {
   register_supervisor,
@@ -280,5 +381,18 @@ module.exports = {
   add_coursework_plan,
   remove_coursework_plan,
   add_supervisor_department,
-  remove_supervisor_department
+  remove_supervisor_department,
+
+  //артем
+  update_course_work_student,
+  delete_course_work,
+  insert_course_work,
+  update_student,
+  add_students_to_group,
+  update_faculty,
+  delete_faculty,
+  insert_faculty,
+  update_department,
+  delete_department
+
 };

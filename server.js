@@ -9,7 +9,7 @@ app.use(express.json());
 
 // Проверка, что сервер жив
 app.get("/", (req, res) => {
-  res.send("API по факультетам. Используйте /api/faculty");
+  res.send("Hello!");
 });
 
 const queryRoutes = require("./routes/queryRouter");

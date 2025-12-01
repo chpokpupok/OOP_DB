@@ -3,11 +3,11 @@ const queries = require("../queries");
 
 //КАМИЛЬ
 //ФУНКЦИЯ ПРОСМОТРА КУРСОВЫХ РАБОТ
-const getCourseworksForTeacher = (req, res) => {
+const get_courseworks_for_teacher = (req, res) => {
     const supervisor_id = req.body.supervisor_id || req.params.supervisor_id;
 
     pool.query(
-        queries.getCourseworksForTeacher,
+        queries.get_courseworks_for_teacher,
         [supervisor_id],
         (error, results) => {
             if (error) {
@@ -24,8 +24,8 @@ const getCourseworksForTeacher = (req, res) => {
 };
 
 //ФУНКЦИЯ ГЕНЕРАЦИИ ЛОГИНОВ И ПАРОЛЕЙ
-const getStudentCredentials = (req, res) => {
-    pool.query(queries.generateStudentCredentials, (error, results) => {
+const get_student_credentials = (req, res) => {
+    pool.query(queries.generate_student_credentials, (error, results) => {
         if (error) {
             console.error("Ошибка при генерации логинов:", error);
             return res.status(400).json({ error: error.message });
@@ -39,8 +39,8 @@ const getStudentCredentials = (req, res) => {
 };
 
 // ФУНКЦИЯ СОЗДАНИЯ ОТЧЕТА (ФИО, ТЕМА, ДАТА)
-const getCourseworkReport = (req, res) => {
-    pool.query(queries.createCourseworkReport, (error, results) => {
+const get_coursework_report = (req, res) => {
+    pool.query(queries.create_coursework_report, (error, results) => {
         if (error) {
             console.error("Ошибка при создании отчета:", error);
             return res.status(400).json({ error: error.message });
@@ -55,7 +55,7 @@ const getCourseworkReport = (req, res) => {
 
 module.exports = {
     //камиль
-    getCourseworksForTeacher,
-    getStudentCredentials,
-    getCourseworkReport
+    get_courseworks_for_teacher,
+    get_student_credentials,
+    get_coursework_report
 };

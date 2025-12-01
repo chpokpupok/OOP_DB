@@ -154,7 +154,7 @@ const insert_department = (req, res) => {
 
 //КАМИЛЬ
 //ПРОЦЕДУРА ИЗМЕНЕНИЯ КУРСОВОЙ РАБОТЫ
-const updateCourseworkTeacher = (req, res) => {
+const update_coursework_teacher = (req, res) => {
     const {
         coursework_id, topic, submission_date, defense_date, topic_status,
         work_link, antiplagiat_level, theory_grade, practice_grade,
@@ -162,7 +162,7 @@ const updateCourseworkTeacher = (req, res) => {
     } = req.body;
 
     pool.query(
-        queries.updateCourseworkTeacher,
+        queries.update_coursework_teacher,
         [
             coursework_id, topic, submission_date, defense_date, topic_status,
             work_link, antiplagiat_level, theory_grade, practice_grade,
@@ -182,11 +182,11 @@ const updateCourseworkTeacher = (req, res) => {
 };
 
 //ПРОЦЕДУРА ДОБАВЛЕНИЯ В ПЛАН КУРСОВЫХ
-const addCourseworkPlan = (req, res) => {
+const add_coursework_plan = (req, res) => {
     const { student_login, supervisor_login, discipline_name, coursework_topic, coursework_date } = req.body;
 
     pool.query(
-        queries.addCourseworkPlan,
+        queries.add_coursework_plan,
         [student_login, supervisor_login, discipline_name, coursework_topic, coursework_date],
         (error, results) => {
             if (error) {
@@ -202,11 +202,11 @@ const addCourseworkPlan = (req, res) => {
 };
 
 //ПРОЦЕДУРА УДАЛЕНИЯ ИЗ ПЛАНА КУРСОВЫХ
-const removeCourseworkPlan = (req, res) => {
+const remove_coursework_plan = (req, res) => {
     const plan_id = req.params.plan_id || req.body.plan_id;
 
     pool.query(
-        queries.removeCourseworkPlan,
+        queries.remove_coursework_plan,
         [plan_id],
         (error, results) => {
             if (error) {
@@ -223,11 +223,11 @@ const removeCourseworkPlan = (req, res) => {
 
 
 //ПРОЦЕДУРА ДОБАВЛЕНИЯ В КАФЕДРУ ПРЕПОДАВАТЕЛЯ
-const addSupervisorDepartment = (req, res) => {
+const add_supervisor_department = (req, res) => {
     const { supervisor_login, department_name } = req.body;
 
     pool.query(
-        queries.addSupervisorDepartment,
+        queries.add_supervisor_department,
         [supervisor_login, department_name],
         (error, results) => {
             if (error) {
@@ -243,11 +243,11 @@ const addSupervisorDepartment = (req, res) => {
 };
 
 // ПРОЦЕДУРА УДАЛЕНИЯ ИЗ КАФЕДРЫ ПРЕПОДАВАТЕЛЯ
-const removeSupervisorDepartment = (req, res) => {
+const remove_supervisor_department = (req, res) => {
     const link_id = req.params.link_id || req.body.link_id;
 
     pool.query(
-        queries.removeSupervisorDepartment,
+        queries.remove_supervisor_department,
         [link_id],
         (error, results) => {
             if (error) {
@@ -276,9 +276,9 @@ module.exports = {
   insert_department,
 
   //камиль
-  updateCourseworkTeacher,
-  addCourseworkPlan,
-  removeCourseworkPlan,
-  addSupervisorDepartment,
-  removeSupervisorDepartment
+  update_coursework_teacher,
+  add_coursework_plan,
+  remove_coursework_plan,
+  add_supervisor_department,
+  remove_supervisor_department
 };

@@ -68,19 +68,19 @@ module.exports = {
   insert_department,
 
   //камиль
-  updateCourseworkTeacher,
-  addCourseworkPlan,
-  removeCourseworkPlan,
-  addSupervisorDepartment,
-  removeSupervisorDepartment,
+  update_coursework_teacher,
+  add_coursework_plan,
+  remove_poursework_plan,
+  add_supervisor_department,
+  remove_supervisor_department,
 
-  getCourseworksForTeacher,
-  generateStudentCredentials,
-  createCourseworkReport,
+  get_courseworks_for_teacher,
+  generate_student_credentials,
+  create_coursework_report,
 
-  getCourseworks,
-  getCourseworkById,
-  addCoursework,
-  updateCoursework,
-  removeCoursework
+  get_courseworks,
+  get_coursework_byId,
+  add_coursework,
+  update_coursework,
+  remove_coursework
 };

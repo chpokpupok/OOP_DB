@@ -17,13 +17,13 @@ router.put("/update_group/", controller.update_group);
 router.delete("/delete_group/", controller.delete_group);
 router.post("/insert_department/", controller.insert_department);
 //камиль
-router.put("/update-coursework", controller.updateCourseworkTeacher);
-router.post("/add-coursework-plan", controller.addCourseworkPlan);
-router.delete("/remove-coursework-plan/:plan_id", controller.removeCourseworkPlan);
-router.post("/remove-coursework-plan", controller.removeCourseworkPlan);
-router.post("/add-supervisor-department", controller.addSupervisorDepartment);
-router.delete("/remove-supervisor-department/:link_id", controller.removeSupervisorDepartment);
-router.post("/remove-supervisor-department", controller.removeSupervisorDepartment);
+router.put("/update-coursework", controller.update_coursework_teacher);
+router.post("/add-coursework-plan", controller.add_coursework_plan);
+router.delete("/remove-coursework-plan/:plan_id", controller.remove_coursework_plan);
+router.post("/remove-coursework-plan", controller.remove_coursework_plan);
+router.post("/add-supervisor-department", controller.add_supervisor_department);
+router.delete("/remove-supervisor-department/:link_id", controller.remove_supervisor_department);
+router.post("/remove-supervisor-department", controller.remove_supervisor_department);
 
 // экспортируем маршрутизатор на server
 module.exports = router;

@@ -13,15 +13,18 @@ app.get("/", (req, res) => {
 });
 
 const queryRoutes = require("./routes/queryRouter");
-
-//работа с хранимыми процедурами БД
-app.use("/api/query", queryRoutes);
-
 const procedureRoutes = require("./routes/procedureRouter");
+const functionRoutes = require("./routes/functionRouter"); // камиль добавил
+
+//работа с обычными запросами БД
+app.use("/api/query", queryRoutes);
 
 //работа с хранимыми процедурами БД
 app.use("/api/procedure", procedureRoutes);
 
+//камиль добавил
+//работа с пользовательскими функциями БД
+app.use("/api/function", functionRoutes);
 
 app.listen(port, () => {
   console.log(`Сервер запущен! http://localhost:${port}`);

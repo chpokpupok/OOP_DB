@@ -152,6 +152,116 @@ const insert_department = (req, res) => {
     );
 };
 
+//КАМИЛЬ
+//ПРОЦЕДУРА ИЗМЕНЕНИЯ КУРСОВОЙ РАБОТЫ
+const updateCourseworkTeacher = (req, res) => {
+    const {
+        coursework_id, topic, submission_date, defense_date, topic_status,
+        work_link, antiplagiat_level, theory_grade, practice_grade,
+        design_grade, defense_grade, commission, work_status, comment
+    } = req.body;
+
+    pool.query(
+        queries.updateCourseworkTeacher,
+        [
+            coursework_id, topic, submission_date, defense_date, topic_status,
+            work_link, antiplagiat_level, theory_grade, practice_grade,
+            design_grade, defense_grade, commission, work_status, comment
+        ],
+        (error, results) => {
+            if (error) {
+                console.error("Ошибка при обновлении курсовой:", error);
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(200).json({ 
+                success: true, 
+                message: "Курсовая работа обновлена успешно" 
+            });
+        }
+    );
+};
+
+//ПРОЦЕДУРА ДОБАВЛЕНИЯ В ПЛАН КУРСОВЫХ
+const addCourseworkPlan = (req, res) => {
+    const { student_login, supervisor_login, discipline_name, coursework_topic, coursework_date } = req.body;
+
+    pool.query(
+        queries.addCourseworkPlan,
+        [student_login, supervisor_login, discipline_name, coursework_topic, coursework_date],
+        (error, results) => {
+            if (error) {
+                console.error("Ошибка при добавлении в план:", error);
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(201).json({
+                success: true,
+                message: "Курсовая добавлена в план успешно"
+            });
+        }
+    );
+};
+
+//ПРОЦЕДУРА УДАЛЕНИЯ ИЗ ПЛАНА КУРСОВЫХ
+const removeCourseworkPlan = (req, res) => {
+    const plan_id = req.params.plan_id || req.body.plan_id;
+
+    pool.query(
+        queries.removeCourseworkPlan,
+        [plan_id],
+        (error, results) => {
+            if (error) {
+                console.error("Ошибка при удалении из плана:", error);
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(200).json({
+                success: true,
+                message: "Курсовая удалена из плана успешно"
+            });
+        }
+    );
+};
+
+
+//ПРОЦЕДУРА ДОБАВЛЕНИЯ В КАФЕДРУ ПРЕПОДАВАТЕЛЯ
+const addSupervisorDepartment = (req, res) => {
+    const { supervisor_login, department_name } = req.body;
+
+    pool.query(
+        queries.addSupervisorDepartment,
+        [supervisor_login, department_name],
+        (error, results) => {
+            if (error) {
+                console.error("Ошибка при добавлении в кафедру:", error);
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(201).json({
+                success: true,
+                message: "Преподаватель добавлен к кафедре успешно"
+            });
+        }
+    );
+};
+
+// ПРОЦЕДУРА УДАЛЕНИЯ ИЗ КАФЕДРЫ ПРЕПОДАВАТЕЛЯ
+const removeSupervisorDepartment = (req, res) => {
+    const link_id = req.params.link_id || req.body.link_id;
+
+    pool.query(
+        queries.removeSupervisorDepartment,
+        [link_id],
+        (error, results) => {
+            if (error) {
+                console.error("Ошибка при удалении из кафедры:", error);
+                return res.status(400).json({ error: error.message });
+            }
+            res.status(200).json({
+                success: true,
+                message: "Преподаватель удален из кафедры успешно"
+            });
+        }
+    );
+};
+
 
 module.exports = {
   register_supervisor,
@@ -164,4 +274,11 @@ module.exports = {
   update_group,
   delete_group,
   insert_department,
+
+  //камиль
+  updateCourseworkTeacher,
+  addCourseworkPlan,
+  removeCourseworkPlan,
+  addSupervisorDepartment,
+  removeSupervisorDepartment
 };

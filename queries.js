@@ -28,6 +28,25 @@ const update_group = "call update_group($1, $2, $3, $4, $5)";
 const delete_group = "call delete_group($1)";
 const insert_department = "call insert_department($1, $2, $3, $4)";
 
+//ПРОЦЕДУРЫ КАМИЛЬ
+const updateCourseworkTeacher = "CALL update_coursework_teacher($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
+const addCourseworkPlan = "CALL add_coursework_plan($1, $2, $3, $4, $5)";
+const removeCourseworkPlan = "CALL remove_coursework_plan($1)";
+const addSupervisorDepartment = "CALL add_supervisor_department($1, $2)";
+const removeSupervisorDepartment = "CALL remove_supervisor_department($1)";
+
+//ПОЛЬЗОВАТЕЛЬСКИЕ ФУНКЦИИ КАМИЛЬ
+const getCourseworksForTeacher = "SELECT * FROM get_courseworks_for_teacher($1)";
+const generateStudentCredentials = "SELECT * FROM generate_student_credentials()";
+const createCourseworkReport = "SELECT * FROM create_coursework_report()";
+
+//ОБЫЧНЫЕ ЗАПРОСЫ ДЛЯ ТАБЛИЦЫ COURSEWORK КАМИЛЬ
+const getCourseworks = "SELECT * FROM coursework";
+const getCourseworkById = "SELECT * FROM coursework WHERE coursework_id = $1";
+const addCoursework = "INSERT INTO coursework (student_id, supervisor_id, discipline_id, topic) VALUES ($1, $2, $3, $4)";
+const updateCoursework = "UPDATE coursework SET topic = $1 WHERE coursework_id = $2";
+const removeCoursework = "DELETE FROM coursework WHERE coursework_id = $1";
+
 
 module.exports = {
   get_faculty,
@@ -47,4 +66,21 @@ module.exports = {
   update_group,
   delete_group,
   insert_department,
+
+  //камиль
+  updateCourseworkTeacher,
+  addCourseworkPlan,
+  removeCourseworkPlan,
+  addSupervisorDepartment,
+  removeSupervisorDepartment,
+
+  getCourseworksForTeacher,
+  generateStudentCredentials,
+  createCourseworkReport,
+
+  getCourseworks,
+  getCourseworkById,
+  addCoursework,
+  updateCoursework,
+  removeCoursework
 };

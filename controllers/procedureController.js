@@ -1,9 +1,60 @@
 //импорт пула БД
 const pool = require("../db");
 const queries = require("../queries");
+const { validationResult, check } = require("express-validator");
+const { body } = require('express-validator');
+
+//проверка регирации препода
+const validate_supervisor_data = [
+
+  body("login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 4, max: 20 }).withMessage("Логин должен содержать от 4 до 20 символов")
+  .matches(/^[a-zA-Z0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+  body("password")
+  .isLength({ min: 6 })
+  .withMessage("Поле Пароль не должно быть пустым и должно содержать не менее 6 символов"),
+
+  body("last_name")
+  .isAlpha("ru-RU", { ignore: " " })
+  .withMessage("Поле Фамилия не должно быть пустым и должно содержать только буквы русского алфавита"),
+
+  body("first_name")
+  .isAlpha("ru-RU", { ignore: " " })
+  .withMessage("Поле Имя не должно быть пустым и должно содержать только буквы русского алфавита"),
+
+  body("middle_name")
+  .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Отчество должно содержать только буквы русского алфавита"),
+
+  body("position")
+  .isAlpha("ru-RU", { ignore: " " }).withMessage("Поле Город не должно быть пустым и должно содержать только буквы русского алфавита"),
+
+  body("phone_number")
+  .isLength({ min: 12, max: 12 }).withMessage("Номер телефона должен содержать 12 символов")
+  .custom((value) => {
+    // Дополнительная проверка на валидность
+    if (!value.startsWith('+7')) {
+      throw new Error('Номер должен начинаться с +7');
+    }
+    return true;
+  }),
+  
+  body("email")
+  .isEmail()
+  .withMessage("Поле email должно содержать валидный email")
+
+];
+
+
 
 //регистрация препода
 const register_supervisor = (req, res) => {
+
+    const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
 
     const {login, password, last_name, first_name, middle_name, position, phone_number, email} = req.body; // извлекаем данные из тела объекта
 
@@ -365,6 +416,7 @@ const update_course_work_student = async (req, res) => {
 };
 
 module.exports = {
+  validate_supervisor_data,
   register_supervisor,
   update_supervisor,
   delete_supervisor,

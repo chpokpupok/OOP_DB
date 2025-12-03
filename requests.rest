@@ -1,0 +1,15 @@
+###
+
+POST http://localhost:3001/api/procedure/register_supervisor
+Content-Type: application/json
+
+{
+    "login": "login_8",
+    "password": "12345",
+    "last_name": "Salikhova",
+    "first_name": "Марина",
+    "middle_name": "Ахатовна",
+    "position": "старший преподаватель",
+    "phone_number": "+79174487555",
+    "email": "salikhova@mail.ru"
+}

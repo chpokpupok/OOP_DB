@@ -6,7 +6,7 @@ const router = Router();
 
 // добавляем маршруты для хранимых процедур
 //сафира
-router.post("/register_supervisor/", controller.register_supervisor);
+router.post("/register_supervisor/", controller.validate_supervisor_data, controller.register_supervisor);
 router.put("/update_supervisor/", controller.update_supervisor);
 router.delete("/delete_supervisor/", controller.delete_supervisor);
 router.post("/insert_discipline/", controller.insert_discipline);
@@ -16,6 +16,7 @@ router.post("/insert_group/", controller.insert_group);
 router.put("/update_group/", controller.update_group);
 router.delete("/delete_group/", controller.delete_group);
 router.post("/insert_department/", controller.insert_department);
+
 //камиль
 router.put("/update_coursework", controller.update_coursework_teacher);
 router.post("/add_coursework_plan", controller.add_coursework_plan);

@@ -5,6 +5,8 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3001;
 
+const { body, validationResult } = require('express-validator');
+
 app.use(express.json());
 
 // Проверка, что сервер жив

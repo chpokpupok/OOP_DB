@@ -1,15 +1,35 @@
 ###
 
-POST http://localhost:3001/api/procedure/register_supervisor
+POST http://localhost:3001/home/register
 Content-Type: application/json
 
 {
-    "login": "login_8",
-    "password": "12345",
-    "last_name": "Salikhova",
-    "first_name": "Марина",
-    "middle_name": "Ахатовна",
-    "position": "старший преподаватель",
+    "login": "pisarenko",
+    "password": "123456",
+    "last_name": "Писаренко",
+    "first_name": "Константин",
+    "middle_name": "Эдуардович",
+    "position": null,
     "phone_number": "+79174487555",
-    "email": "salikhova@mail.ru"
+    "email": "pisarenko@mail.ru"
 }
+
+###
+
+POST http://localhost:3001/home/login_supervisor
+Content-Type: application/json
+
+{"login": "pisarenko", "password": "123456"}
+
+###
+
+GET http://localhost:3001/home
+
+###
+
+POST http://localhost:3001/home/login_student
+Content-Type: application/json
+
+{"login": "солдатовсаф001", "password": "ef5c9a7b210cbb"}
+
+###

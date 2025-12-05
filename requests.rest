@@ -4,12 +4,12 @@ POST http://localhost:3001/home/register
 Content-Type: application/json
 
 {
-    "login": "pisarenko",
+    "login": "pisareo",
     "password": "123456",
     "last_name": "Писаренко",
     "first_name": "Константин",
     "middle_name": "Эдуардович",
-    "position": null,
+    "position": "зав. кафедрой",
     "phone_number": "+79174487555",
     "email": "pisarenko@mail.ru"
 }

@@ -180,8 +180,8 @@ const validate_supervisor_data = [
   body("middle_name")
   .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Отчество должно содержать только буквы русского алфавита"),
 
-  body("position")
-  .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Должность должно содержать только буквы русского алфавита"),
+ body("position")
+  .matches(/^[а-яёА-ЯЁ .]*$/).withMessage("Поле Должность должно содержать только буквы русского алфавита, пробелы и точки"),
 
   body("phone_number")
   .isLength({ min: 12, max: 12 }).withMessage("Номер телефона должен содержать 12 символов")
@@ -215,7 +215,7 @@ const register_supervisor = async (req, res) => {
         queries.register_supervisor,
         [login, hashed_password, last_name, first_name, middle_name, position, phone_number, email],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Superviser insered");
         }
     );

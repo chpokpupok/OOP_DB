@@ -40,6 +40,8 @@ const add_coursework = "INSERT INTO coursework (student_id, supervisor_id, disci
 const update_coursework = "UPDATE coursework SET topic = $1 WHERE coursework_id = $2";
 const remove_coursework = "DELETE FROM coursework WHERE coursework_id = $1";
 
+const get_courseworks_for_student = "SELECT * FROM coursework WHERE student_id = $1";
+
 //артем процедуры
 
 const delete_department = 'CALL delete_department($1)';
@@ -90,6 +92,8 @@ module.exports = {
   add_coursework,
   update_coursework,
   remove_coursework,
+
+  get_courseworks_for_student,
 
   //артем
 

@@ -3,25 +3,91 @@ const pool = require("../db");
 const queries = require("../queries");
 const { validationResult, check } = require("express-validator");
 const { body } = require('express-validator');
+const bcrypt = require("bcrypt");
 
+//проверка обновления препода
+const validate_up_supervisor_data = [
+
+  body("login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 4, max: 20 }).withMessage("Логин должен содержать от 4 до 20 символов")
+  .matches(/^[a-zA-Z0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+  body("password")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isLength({ min: 6 })
+  .withMessage("Поле Пароль должно содержать не менее 6 символов"),
+
+  body("last_name")
+  .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Фамилия должно содержать только буквы русского алфавита"),
+
+  body("first_name")
+  .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Имя должно содержать только буквы русского алфавита"),
+
+  body("middle_name")
+  .matches(/^[а-яёА-ЯЁs]*$/).withMessage("Поле Отчество должно содержать только буквы русского алфавита"),
+
+ body("position")
+  .matches(/^[а-яёА-ЯЁ .]*$/).withMessage("Поле Должность должно содержать только буквы русского алфавита, пробелы и точки"),
+
+  body("phone_number")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isLength({ min: 12, max: 12 }).withMessage("Номер телефона должен содержать 12 символов")
+  .custom((value) => {
+    // Дополнительная проверка на валидность
+    if (!value.startsWith('+7')) {
+      throw new Error('Номер должен начинаться с +7');
+    }
+    return true;
+  }),
+  
+  body("email")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isEmail()
+  .withMessage("Поле email должно содержать валидный email")
+
+];
 
 //обновление препода
-const update_supervisor = (req, res) => {
+const update_supervisor = async (req, res) => {
+
+    const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
 
     const {login, password, last_name, first_name, middle_name, position, phone_number, email} = req.body; // извлекаем данные из тела объекта
-
+    const hashed_password = (password == null)?null:await bcrypt.hash(password, 10);
     pool.query(
         queries.update_supervisor,
-        [login, password, last_name, first_name, middle_name, position, phone_number, email],
+        [login, hashed_password, last_name, first_name, middle_name, position, phone_number, email],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Superviser updated");
         }
     );
 };
 
+//проверка удаления препода
+const validate_del_supervisor_data = [
+
+  body("login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 4, max: 20 }).withMessage("Логин должен содержать от 4 до 20 символов")
+  .matches(/^[a-zA-Z0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+];
+
 //удаление препода
-const delete_supervisor = (req, res) => {
+const delete_supervisor = async (req, res) => {
+
+    const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
 
     const {login} = req.body; // извлекаем данные из тела объекта
 
@@ -29,14 +95,14 @@ const delete_supervisor = (req, res) => {
         queries.delete_supervisor,
         [login],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Superviser deleted");
         }
     );
 };
 
 //добавление дисциплины
-const insert_discipline = (req, res) => {
+const insert_discipline = async (req, res) => {
 
     const {name, department, semester} = req.body; // извлекаем данные из тела объекта
 
@@ -44,14 +110,14 @@ const insert_discipline = (req, res) => {
         queries.insert_discipline,
         [name, department, semester],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Discipline insered");
         }
     );
 };
 
 //обновление дисциплины
-const update_discipline = (req, res) => {
+const update_discipline = async (req, res) => {
 
     const {old_name, old_department, new_name, new_department, semester} = req.body; // извлекаем данные из тела объекта
 
@@ -59,14 +125,14 @@ const update_discipline = (req, res) => {
         queries.update_discipline,
         [old_name, old_department, new_name, new_department, semester],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Discipline updated");
         }
     );
 };
 
 //удаление дисциплины
-const delete_discipline = (req, res) => {
+const delete_discipline = async (req, res) => {
 
     const {name, department} = req.body; // извлекаем данные из тела объекта
 
@@ -74,14 +140,14 @@ const delete_discipline = (req, res) => {
         queries.delete_discipline,
         [name, department],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Discipline deleted");
         }
     );
 };
 
 //добавление группы
-const insert_group = (req, res) => {
+const insert_group = async (req, res) => {
 
     const {name, year_of_admission, department, education_type, study_duration} = req.body; // извлекаем данные из тела объекта
 
@@ -89,14 +155,14 @@ const insert_group = (req, res) => {
         queries.insert_group,
         [name, year_of_admission, department, education_type, study_duration],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Group insered");
         }
     );
 };
 
 //обновление группы
-const update_group = (req, res) => {
+const update_group = async (req, res) => {
 
     const {name, year_of_admission, department, education_type, study_duration} = req.body; // извлекаем данные из тела объекта
 
@@ -104,14 +170,14 @@ const update_group = (req, res) => {
         queries.update_group,
         [name, year_of_admission, department, education_type, study_duration],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Group updated");
         }
     );
 };
 
 //удаление группы
-const delete_group = (req, res) => {
+const delete_group = async (req, res) => {
 
     const {name} = req.body; // извлекаем данные из тела объекта
 
@@ -119,14 +185,14 @@ const delete_group = (req, res) => {
         queries.delete_group,
         [name],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Group deleted");
         }
     );
 };
 
 //добавление кафедры
-const insert_department = (req, res) => {
+const insert_department = async (req, res) => {
 
     const {name, faculty, head, phone} = req.body; // извлекаем данные из тела объекта
 
@@ -134,7 +200,7 @@ const insert_department = (req, res) => {
         queries.insert_department,
         [name, faculty, head, phone],
         (error, results) => {
-        if (error) res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
+        if (error) return res.status(500).json({ error: "Ошибка сервера", details: error.message }); //если есть ошибка, то вывести сообщение об ошибке
         res.status(201).send("Department insered");
         }
     );
@@ -142,7 +208,75 @@ const insert_department = (req, res) => {
 
 //КАМИЛЬ
 //ПРОЦЕДУРА ИЗМЕНЕНИЯ КУРСОВОЙ РАБОТЫ
-const update_coursework_teacher = (req, res) => {
+
+//проверка
+const validate_up_coursework_data = [
+
+  body("submission_date")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .matches(/^\d{2}[./-]\d{2}[./-]\d{4}$/).withMessage("Неверный формат даты"),
+
+  body("defense_date")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .matches(/^\d{2}[./-]\d{2}[./-]\d{4}$/).withMessage("Неверный формат даты"),
+
+  body("topic_status")
+  .matches(/^[а-яёА-ЯЁ -]*$/).withMessage("Поле Статус темы должно содержать только буквы русского алфавита, пробелы"),
+
+  body("work_link")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isURL({
+    protocols: ['http', 'https'], // Разрешаем только HTTP и HTTPS
+    require_protocol: true, // Требуем указание протокола
+    require_valid_protocol: true, // Протокол должен быть из разрешенных
+    allow_protocol_relative_urls: false // Запрещаем относительные URL без протокола
+  })
+  .withMessage("Неверный адрес"),
+
+  body("antiplagiat_level")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isInt({ min: 0, max: 100 })
+  .withMessage('Уровень антиплагиата должен быть целым числом от 0 до 100'),
+
+  body("theory_grade")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isFloat({ min: 0, max: 5 })
+  .withMessage('theory_grade должен быть числом от 0 до 5'),
+
+  body("practice_grade")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isFloat({ min: 0, max: 5 })
+  .withMessage('practice_grade должен быть числом от 0 до 5'),
+
+  body("design_grade")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isFloat({ min: 0, max: 5 })
+  .withMessage('design_grade должен быть числом от 0 до 5'),
+
+  body("defense_grade")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isFloat({ min: 0, max: 5 })
+  .withMessage('defense_grade должен быть числом от 0 до 5'),
+
+  body("work_status")
+  .matches(/^[а-яёА-ЯЁ -]*$/).withMessage("Поле Статус работы должно содержать только буквы русского алфавита, пробелы")
+];
+
+const update_coursework_teacher = async (req, res) => {
+
+    const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
     const {
         coursework_id, topic, submission_date, defense_date, topic_status,
         work_link, antiplagiat_level, theory_grade, practice_grade,
@@ -169,49 +303,9 @@ const update_coursework_teacher = (req, res) => {
     );
 };
 
-//ПРОЦЕДУРА ДОБАВЛЕНИЯ В ПЛАН КУРСОВЫХ
-const add_coursework_plan = (req, res) => {
-    const { student_login, supervisor_login, discipline_name, coursework_topic, coursework_date } = req.body;
-
-    pool.query(
-        queries.add_coursework_plan,
-        [student_login, supervisor_login, discipline_name, coursework_topic, coursework_date],
-        (error, results) => {
-            if (error) {
-                console.error("Ошибка при добавлении в план:", error);
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(201).json({
-                success: true,
-                message: "Курсовая добавлена в план успешно"
-            });
-        }
-    );
-};
-
-//ПРОЦЕДУРА УДАЛЕНИЯ ИЗ ПЛАНА КУРСОВЫХ
-const remove_coursework_plan = (req, res) => {
-    const plan_id = req.params.plan_id || req.body.plan_id;
-
-    pool.query(
-        queries.remove_coursework_plan,
-        [plan_id],
-        (error, results) => {
-            if (error) {
-                console.error("Ошибка при удалении из плана:", error);
-                return res.status(400).json({ error: error.message });
-            }
-            res.status(200).json({
-                success: true,
-                message: "Курсовая удалена из плана успешно"
-            });
-        }
-    );
-};
-
 
 //ПРОЦЕДУРА ДОБАВЛЕНИЯ В КАФЕДРУ ПРЕПОДАВАТЕЛЯ
-const add_supervisor_department = (req, res) => {
+const add_supervisor_department = async (req, res) => {
     const { supervisor_login, department_name } = req.body;
 
     pool.query(
@@ -231,7 +325,7 @@ const add_supervisor_department = (req, res) => {
 };
 
 // ПРОЦЕДУРА УДАЛЕНИЯ ИЗ КАФЕДРЫ ПРЕПОДАВАТЕЛЯ
-const remove_supervisor_department = (req, res) => {
+const remove_supervisor_department = async (req, res) => {
     const link_id = req.params.link_id || req.body.link_id;
 
     pool.query(
@@ -312,7 +406,40 @@ const add_students_to_group = async (req, res) => {
   }
 };
 
+//проверка
+const validate_up_student_data = [
+
+  body("student_login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 5, max: 16 }).withMessage("Логин должен содержать от 5 до 16 символов")
+  .matches(/^[a-zA-Zа-яА-ЯёЁ0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+  body("phone")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isLength({ min: 12, max: 12 }).withMessage("Номер телефона должен содержать 12 символов")
+  .custom((value) => {
+    // Дополнительная проверка на валидность
+    if (!value.startsWith('+7')) {
+      throw new Error('Номер должен начинаться с +7');
+    }
+    return true;
+  }),
+  
+  body("email")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
+  .isEmail()
+  .withMessage("Поле email должно содержать валидный email")
+
+];
+
 const update_student = async (req, res) => {
+  const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+  
   const { student_login, phone, email, leader } = req.body;
   try {
     await pool.query(queries.update_student, [student_login, phone, email, leader]);
@@ -322,10 +449,33 @@ const update_student = async (req, res) => {
   }
 };
 
+//проверка
+const validate_ins_coursework_data = [
+
+  body("student_login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 5, max: 16 }).withMessage("Логин должен содержать от 5 до 16 символов")
+  .matches(/^[a-zA-Zа-яА-ЯёЁ0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+  body("supervisor_login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 4, max: 20 }).withMessage("Логин должен содержать от 4 до 20 символов")
+  .matches(/^[a-zA-Z0-9_.]+$/).withMessage("Логин может содержать только латинские, русские буквы, цифры, точку и подчеркивание"),
+
+  body("year")
+  .matches(/^\d{2}[./-]\d{2}[./-]\d{4}$/).withMessage("Неверный формат даты")
+];
+
+
 const insert_course_work = async (req, res) => {
-  const { student_login, supervisor_login, discipline_name, topic } = req.body;
+  const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
+  const { student_login, supervisor_login, discipline_name, topic, year } = req.body;
   try {
-    await pool.query(queries.insert_coursework, [student_login, supervisor_login, discipline_name, topic]);
+    await pool.query(queries.insert_coursework, [student_login, supervisor_login, discipline_name, topic, year]);
     res.status(201).json({ success: true, message: 'Coursework created' });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -342,7 +492,24 @@ const delete_course_work = async (req, res) => {
   }
 };
 
+
+const validate_link_data = [
+body("work_link")
+  .isURL({
+    protocols: ['http', 'https'], // Разрешаем только HTTP и HTTPS
+    require_protocol: true, // Требуем указание протокола
+    require_valid_protocol: true, // Протокол должен быть из разрешенных
+    allow_protocol_relative_urls: false // Запрещаем относительные URL без протокола
+  })
+  .withMessage("Неверный адрес"),
+];
+
 const update_course_work_student = async (req, res) => {
+  const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
   const { coursework_id, topic, work_link } = req.body;
   try {
     await pool.query(queries.update_coursework_student, [coursework_id, topic, work_link]);
@@ -353,6 +520,14 @@ const update_course_work_student = async (req, res) => {
 };
 
 module.exports = {
+  validate_up_supervisor_data,
+  validate_del_supervisor_data,
+  validate_up_coursework_data,
+  validate_up_student_data,
+  validate_ins_coursework_data,
+  validate_link_data,
+
+
   update_supervisor,
   delete_supervisor,
   insert_discipline,
@@ -365,8 +540,6 @@ module.exports = {
 
   //камиль
   update_coursework_teacher,
-  add_coursework_plan,
-  remove_coursework_plan,
   add_supervisor_department,
   remove_supervisor_department,
 

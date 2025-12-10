@@ -15,9 +15,29 @@ const secretKey = process.env.secretKey; // получение значения 
 //urlencoded({ extended: true })); //обрабатывает данные формы и добавляет их в объект req.body
 const urlencodedParser = express.urlencoded({ extended: true }); //создадим отдельный экземпляр urlencodedParser для обработки данных из формы внутри функции getLogin
 
+
+
+//проверка login преподавателя
+const validate_supervisor_login_data = [
+
+body("login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 4, max: 20 }).withMessage("Логин должен содержать от 4 до 20 символов")
+  .matches(/^[a-zA-Z0-9_.]+$/).withMessage("Логин может содержать только латинские буквы, цифры, точку и подчеркивание"),
+
+  body("password")
+  .isLength({ min: 6 })
+  .withMessage("Поле Пароль не должно быть пустым и должно содержать не менее 6 символов")
+];
+
+
 // Аутентификация преподавателя
 //не забудьте использовать async/await при выполнении асинхронных операций, таких как запрос к базе данных
 const get_supervisor_login = async (req, res) => {
+  const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
   // применим парсер для обработки данных из формы
   urlencodedParser(req, res, async () => {
     //const { username, password } = req.body;
@@ -80,10 +100,26 @@ const get_supervisor_login = async (req, res) => {
   });
 };
 
+//проверка студента
+const validate_student_login_data = [
+
+  body("login")
+  .notEmpty().withMessage("Логин не должен быть пустым")
+  .isLength({ min: 5, max: 16 }).withMessage("Логин должен содержать от 5 до 16 символов")
+  .matches(/^[a-zA-Zа-яА-ЯёЁ0-9_.]+$/).withMessage("Логин может содержать только латинские, русские буквы, цифры, точку и подчеркивание"),
+
+  body("password")
+  .isLength({ min: 14, max: 14 })
+  .withMessage("Поле Пароль не должно быть пустым и должно содержать 14 символов")
+];
 
 // Аутентификация студента
 //не забудьте использовать async/await при выполнении асинхронных операций, таких как запрос к базе данных
 const get_student_login = async (req, res) => {
+  const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
   // применим парсер для обработки данных из формы
   urlencodedParser(req, res, async () => {
     //const { username, password } = req.body;
@@ -184,6 +220,8 @@ const validate_supervisor_data = [
   .matches(/^[а-яёА-ЯЁ .]*$/).withMessage("Поле Должность должно содержать только буквы русского алфавита, пробелы и точки"),
 
   body("phone_number")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
   .isLength({ min: 12, max: 12 }).withMessage("Номер телефона должен содержать 12 символов")
   .custom((value) => {
     // Дополнительная проверка на валидность
@@ -194,6 +232,8 @@ const validate_supervisor_data = [
   }),
   
   body("email")
+  .optional()
+  .if((value) => value !== null && value !== undefined)
   .isEmail()
   .withMessage("Поле email должно содержать валидный email")
 
@@ -229,5 +269,7 @@ module.exports = {
   get_student_login,
   get_redirect_home,
   register_supervisor,
-  validate_supervisor_data
+  validate_supervisor_data,
+  validate_supervisor_login_data,
+  validate_student_login_data
 };

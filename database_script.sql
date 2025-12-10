@@ -117,9 +117,6 @@ CREATE TABLE discipline (
 -- Создание таблицы Курсовая работа (Coursework)
 CREATE TABLE coursework (
     coursework_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    student_id INTEGER NOT NULL,
-    supervisor_id INTEGER NOT NULL,
-    discipline_id INTEGER NOT NULL,
     submission_date DATE,
     defense_date DATE,
     topic TEXT NOT NULL,
@@ -152,7 +149,7 @@ CREATE TABLE coursework_plan (
     supervisor_id INTEGER NOT NULL,
     discipline_id INTEGER NOT NULL,
     coursework_id INTEGER NOT NULL,
-  coursework_date DATE NOT NULL,
+  coursework_year DATE NOT NULL,
     
     CONSTRAINT fk_plan_student 
         FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE RESTRICT,
@@ -555,74 +552,6 @@ BEGIN
 END;
 $$;
 
--- ПРОЦЕДУРА ЗАПОЛНЕНИЯ ПЛАНА КУРСОВЫХ (по названиям)
-CREATE OR REPLACE PROCEDURE add_coursework_plan(
-    p_student_login VARCHAR(20),
-    p_supervisor_login VARCHAR(20),
-    p_discipline_name TEXT,
-    p_coursework_topic TEXT,
-    p_coursework_date DATE
-)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_student_id INTEGER;
-    v_supervisor_id INTEGER;
-    v_discipline_id INTEGER;
-    v_coursework_id INTEGER;
-BEGIN
-    -- Получаем ID по логинам и названиям
-    SELECT student_id INTO v_student_id FROM student WHERE login = p_student_login;
-    SELECT supervisor_id INTO v_supervisor_id FROM scientific_supervisor WHERE login = p_supervisor_login;
-    SELECT discipline_id INTO v_discipline_id FROM discipline WHERE name = p_discipline_name;
-    
-    IF v_student_id IS NULL THEN
-        RAISE EXCEPTION 'Студент с логином % не найден', p_student_login;
-    END IF;
-    
-    IF v_supervisor_id IS NULL THEN
-        RAISE EXCEPTION 'Преподаватель с логином % не найден', p_supervisor_login;
-    END IF;
-    
-    IF v_discipline_id IS NULL THEN
-        RAISE EXCEPTION 'Дисциплина % не найдена', p_discipline_name;
-    END IF;
-    
-    -- Создаем запись в coursework
-    INSERT INTO coursework (student_id, supervisor_id, discipline_id, topic, work_status, topic_status)
-    VALUES (v_student_id, v_supervisor_id, v_discipline_id, p_coursework_topic, 'Черновик', 'На проверке')
-    RETURNING coursework_id INTO v_coursework_id;
-    
-    -- Добавляем в план
-    INSERT INTO coursework_plan (student_id, supervisor_id, discipline_id, coursework_id, coursework_date)
-    VALUES (v_student_id, v_supervisor_id, v_discipline_id, v_coursework_id, p_coursework_date);
-END;
-$$;
-
--- ПРОЦЕДУРА УДАЛЕНИЯ ИЗ ПЛАНА КУРСОВЫХ
-CREATE OR REPLACE PROCEDURE remove_coursework_plan(p_plan_id INTEGER)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_coursework_id INTEGER;
-BEGIN
-    -- Получаем ID курсовой работы из плана
-    SELECT coursework_id INTO v_coursework_id 
-    FROM coursework_plan 
-    WHERE plan_id = p_plan_id;
-    
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Запись в плане с ID % не найдена', p_plan_id;
-    END IF;
-    
-    -- Удаляем из плана
-    DELETE FROM coursework_plan WHERE plan_id = p_plan_id;
-    
-    -- Удаляем саму курсовую работу
-    DELETE FROM coursework WHERE coursework_id = v_coursework_id;
-END;
-$$;
-
 -- ПРОЦЕДУРА ЗАПОЛНЕНИЯ "КАФЕДРА ПРЕПОДАВАТЕЛЯ" (по названиям)
 CREATE OR REPLACE PROCEDURE add_supervisor_department(
     p_supervisor_login VARCHAR(20),
@@ -775,30 +704,12 @@ DECLARE
     v_student_count INTEGER;
 BEGIN
     SELECT COUNT(DISTINCT student_id) INTO v_student_count
-    FROM coursework
+    FROM coursework_plan
     WHERE supervisor_id = NEW.supervisor_id;
     
     IF v_student_count > 10 THEN
         RAISE NOTICE 'Внимание! У преподавателя ID % уже % студентов. Максимальная нагрузка - 10 студентов.', 
                      NEW.supervisor_id, v_student_count;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- ТРИГГЕРНАЯ ФУНКЦИЯ ПРОВЕРКИ УНИКАЛЬНОСТИ ТЕМЫ
-CREATE OR REPLACE FUNCTION check_topic_uniqueness()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM coursework c
-        WHERE c.discipline_id = NEW.discipline_id
-        AND LOWER(c.topic) = LOWER(NEW.topic)
-        AND EXTRACT(YEAR FROM COALESCE(c.defense_date, CURRENT_DATE)) = EXTRACT(YEAR FROM CURRENT_DATE)
-        AND c.coursework_id != COALESCE(NEW.coursework_id, 0)
-    ) THEN
-        RAISE EXCEPTION 'Тема "%" уже используется в этом году по данной дисциплине', NEW.topic;
     END IF;
     
     RETURN NEW;
@@ -1075,11 +986,13 @@ CREATE OR REPLACE PROCEDURE insert_coursework(
     pstudent_login VARCHAR(20),
     psupervisor_login VARCHAR(20),
     pdiscipline_name TEXT,
-    ptopic TEXT
+    ptopic TEXT,
+	pyear DATE
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
+	v_coursework_id INT;
     v_student_id INT;
     v_supervisor_id INT;
     v_discipline_id INT;
@@ -1106,15 +1019,21 @@ BEGIN
         RAISE EXCEPTION 'Discipline "%" not found', pdiscipline_name;
     END IF;
 
-    INSERT INTO coursework (
-        student_id, supervisor_id, discipline_id,
-        submission_date, defense_date,
-        topic, topic_status, work_status
+	INSERT INTO coursework(submission_date, defense_date,
+        topic, topic_status, work_status)
+	VALUES (NULL, NULL,
+        ptopic, 'На проверке', 'Черновик');
+
+	SELECT coursework_id INTO v_coursework_id
+    FROM coursework
+    ORDER BY coursework_id DESC
+	LIMIT 1;
+	
+    INSERT INTO coursework_plan (
+         student_id, supervisor_id, discipline_id, coursework_id, coursework_year
     )
     VALUES (
-        v_student_id, v_supervisor_id, v_discipline_id,
-        NULL, NULL,
-        ptopic, 'Принята', 'В работе'
+         v_student_id, v_supervisor_id, v_discipline_id, v_coursework_id, pyear
     );
 
     RAISE NOTICE 'Coursework created successfully';
@@ -1126,6 +1045,11 @@ CREATE OR REPLACE PROCEDURE delete_coursework(pcoursework_id INT)
 LANGUAGE plpgsql
 AS $$
 BEGIN
+	DELETE FROM coursework_plan WHERE coursework_id = pcoursework_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Coursework with ID % not found', pcoursework_id;
+    END IF;
+	
     DELETE FROM coursework WHERE coursework_id = pcoursework_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Coursework with ID % not found', pcoursework_id;
@@ -1154,7 +1078,7 @@ BEGIN
     END IF;
 
     IF v_current.topic_status NOT IN ('Принята', '-', 'На проверке') OR
-       v_current.work_status NOT IN ('В работе', '-', 'На проверке') THEN
+       v_current.work_status NOT IN ('Принята', 'Защищена', '-', 'На проверке') THEN
         RAISE EXCEPTION
             'Cannot update: status is "%" / "%"',
             v_current.topic_status, v_current.work_status;
@@ -1186,15 +1110,9 @@ CREATE OR REPLACE TRIGGER tr_calculate_final_grade
 
 -- Триггер для проверки нагрузки
 CREATE OR REPLACE TRIGGER tr_check_supervisor_workload
-    BEFORE INSERT ON coursework
+    BEFORE INSERT ON coursework_plan
     FOR EACH ROW
     EXECUTE FUNCTION check_supervisor_workload();
-
--- Триггер для проверки уникальности темы
-CREATE OR REPLACE TRIGGER tr_check_topic_uniqueness
-    BEFORE INSERT OR UPDATE OF topic ON coursework
-    FOR EACH ROW
-    EXECUTE FUNCTION check_topic_uniqueness();
 
 -- Триггер для статуса работы
 CREATE OR REPLACE TRIGGER tr_update_work_status
@@ -1241,14 +1159,9 @@ INSERT INTO discipline (name, department_id, semester) VALUES
 ('Менеджмент', 2, 3);
 
 -- Вставка курсовой работы
-INSERT INTO coursework (student_id, supervisor_id, discipline_id, submission_date, defense_date, topic, topic_status, work_status) VALUES
-(1, 1, 1, '2023-12-01', '2024-01-15', 'Разработка веб-приложения', 'На проверке', '-'),
-(2, 2, 2, '2024-01-10', '2024-02-20', 'Исследование рынка', 'Принята', 'Черновик');
-
--- Вставка планов курсовых
-INSERT INTO coursework_plan (student_id, supervisor_id, discipline_id, coursework_id, coursework_date) VALUES
-(1,1,1,1,'2023-11-20'),
-(2,2,2,2,'2023-12-15');
+INSERT INTO coursework (submission_date, defense_date, topic, topic_status, work_status) VALUES
+('2023-12-01', '2024-01-15', 'Разработка веб-приложения', 'На проверке', '-'),
+('2024-01-10', '2024-02-20', 'Исследование рынка', 'Принята', 'Черновик');
 
 -- Вставка связей преподаватель - кафедра
 INSERT INTO supervisor_department (supervisor_id, department_id) VALUES

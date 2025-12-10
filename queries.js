@@ -23,8 +23,6 @@ const insert_department = "call insert_department($1, $2, $3, $4)";
 
 //ПРОЦЕДУРЫ КАМИЛЬ
 const update_coursework_teacher = "CALL update_coursework_teacher($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)";
-const add_coursework_plan = "CALL add_coursework_plan($1, $2, $3, $4, $5)";
-const remove_coursework_plan = "CALL remove_coursework_plan($1)";
 const add_supervisor_department = "CALL add_supervisor_department($1, $2)";
 const remove_supervisor_department = "CALL remove_supervisor_department($1)";
 
@@ -51,7 +49,7 @@ const delete_faculty = 'CALL delete_faculty($1)';
 const update_faculty = 'CALL update_faculty($1, $2, $3, $4)';
 const add_students_to_group = 'CALL add_students_to_group($1, $2::TEXT[])';
 const update_student = 'CALL update_student($1, $2, $3, $4)';
-const insert_coursework = 'CALL insert_coursework($1, $2, $3, $4)';
+const insert_coursework = 'CALL insert_coursework($1, $2, $3, $4, $5)';
 const delete_coursework = 'CALL delete_coursework($1)';
 const update_coursework_student = 'CALL update_coursework_student($1, $2, $3)';
 
@@ -78,8 +76,6 @@ module.exports = {
 
   //камиль
   update_coursework_teacher,
-  add_coursework_plan,
-  remove_coursework_plan,
   add_supervisor_department,
   remove_supervisor_department,
 

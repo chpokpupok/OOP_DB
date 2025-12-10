@@ -5,8 +5,8 @@ const controller = require("../controllers/userController"); //импортир�
 const router = Router();
 
 // добавляем маршруты
-router.post("/login_supervisor", controller.get_supervisor_login);
-router.post("/login_student", controller.get_student_login);
+router.post("/login_supervisor", controller.validate_supervisor_login_data, controller.get_supervisor_login);
+router.post("/login_student", controller.validate_student_login_data, controller.get_student_login);
 router.post("/register", controller.validate_supervisor_data, controller.register_supervisor);
 
 //создание домашнего маршрута, который будет выводить имя пользователя.

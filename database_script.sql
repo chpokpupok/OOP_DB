@@ -460,19 +460,11 @@ BEGIN
         RAISE EXCEPTION 'Курсовая работа с ID % не найдена', p_coursework_id;
     END IF;
     
-    -- Проверка: нельзя ставить "принято", если работа не прикреплена в срок
-    IF p_topic_status = 'Принята' THEN
-        IF v_current_coursework.submission_date IS NULL OR 
-           v_current_coursework.submission_date > v_current_coursework.defense_date THEN
-            RAISE EXCEPTION 'Нельзя принять тему: работа не сдана в срок';
-        END IF;
-    END IF;
-    
     -- Проверка: нельзя ставить оценки, если работа не прикреплена в срок
     IF (p_theory_grade IS NOT NULL OR p_practice_grade IS NOT NULL OR 
         p_design_grade IS NOT NULL OR p_defense_grade IS NOT NULL) THEN
-        IF v_current_coursework.submission_date IS NULL OR 
-           v_current_coursework.submission_date > v_current_coursework.defense_date THEN
+        IF COALESCE(p_submission_date, v_current_coursework.submission_date) IS NULL OR 
+           COALESCE(p_submission_date, v_current_coursework.submission_date) > COALESCE(p_defense_date, v_current_coursework.defense_date) THEN
             RAISE EXCEPTION 'Нельзя выставлять оценки: работа не сдана в срок';
         END IF;
     END IF;
@@ -543,11 +535,11 @@ BEGIN
         c.work_status,
         COALESCE(c.final_grade, 0) as final_grade,
         c.comment
-    FROM coursework c
-    JOIN student s ON c.student_id = s.student_id
+    FROM coursework c JOIN coursework_plan cp ON c.coursework_id = cp.coursework_id
+    JOIN student s ON cp.student_id = s.student_id
     JOIN "group" g ON s.group_id = g.group_id
-    JOIN discipline d ON c.discipline_id = d.discipline_id
-    WHERE c.supervisor_id = p_supervisor_id
+    JOIN discipline d ON cp.discipline_id = d.discipline_id
+    WHERE cp.supervisor_id = p_supervisor_id
     ORDER BY c.defense_date DESC;
 END;
 $$;
@@ -735,8 +727,8 @@ BEGIN
         c.submission_date,
         c.defense_date,
         c.work_status
-    FROM coursework c
-    JOIN student s ON c.student_id = s.student_id
+    FROM coursework c JOIN coursework_plan cp ON c.coursework_id = cp.coursework_id
+    JOIN student s ON cp.student_id = s.student_id
     ORDER BY s.last_name, s.first_name;
 END;
 $$;
